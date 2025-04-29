@@ -38,10 +38,13 @@ class GoogleApiHeadersPlugin : MethodCallHandler, FlutterPlugin {
                 val packageManager = context!!.packageManager
                 val args = call.arguments<String>()!!
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                    packageManager.getPackageInfo(
+                    val signingInfo = packageManager.getPackageInfo(
                         args,
                         PackageManager.GET_SIGNING_CERTIFICATES
-                    ).signingInfo.apkContentsSigners.forEach { signature ->
+                    ).signingInfo
+                    
+                    // Added null safety check with safe call operator
+                    signingInfo?.apkContentsSigners?.forEach { signature ->
                         parseSignature(
                             signature,
                             result
@@ -49,10 +52,13 @@ class GoogleApiHeadersPlugin : MethodCallHandler, FlutterPlugin {
                     }
                 } else {
                     @Suppress("DEPRECATION")
-                    packageManager.getPackageInfo(
+                    val signatures = packageManager.getPackageInfo(
                         args,
                         PackageManager.GET_SIGNATURES
-                    ).signatures.forEach { signature -> parseSignature(signature, result) }
+                    ).signatures
+                    
+                    // Added null safety check with safe call operator
+                    signatures?.forEach { signature -> parseSignature(signature, result) }
                 }
 
             } catch (e: Exception) {
